@@ -1,0 +1,119 @@
+/*  
+  1. what is reconciliation;
+  the process of comparing the virtaul and actual dom 
+  and determining the most optimized way of updating the dom by making minimal changes to actual dom 
+  
+  when a state is changed the react first updates the virtual dom and then compares 
+  it with the actual dom and makes changes in only tose part which are updated so this is a fater and
+  effecient way of updating the dom.
+  
+  lightweight copy of real dom is known as Virtual dom 
+
+  if we directly update the dom then we use refs or useRef to do so but is not udvised until 
+  and unless it is most important.
+  eg: managing focus on an input field, triggering imperative animations, accessing scroll position, 
+  when you need to read specific values directly from the DOM that cannot be easily accessed through React's state management system.
+2. what is output of code below
+    const clickButton = () => {
+      setCount(count+1);
+      setCount(count+1);
+      }
+    
+    output will be 1
+    how can we correct it 
+    we can use functional behaviour of the rect state as it ensures to take the latest
+    value of the state 
+    const clickButton = ( ) => {
+      setCount(count => count+1);
+      setCount(count => count+1);
+      } 
+    so the diffrence in these two code is that 
+    as useSate updates are asynchronous so due to that in the first case the asynchronous batch has 
+    initial value as 0 so after updating the values is still 1
+    but in the 2nd case we used functional form of the state as it takes the previous state as an argument
+    so on second setCount it took its latest value as 1 and perform inciment sue to which we got asnwer as 2
+
+
+    3. what is useMemo and useCallback
+
+    useMemo is used to reduce the un-necessary rendering of the components when there values are not changed 
+    export const myApp = ({a,b}) => {
+      const calulation = (a,b) => {
+        return a+b;   
+      
+      }
+
+      const value = useMemo(() => caluction(a,b), [a,b]);
+      return(
+      <div><div/>
+      );
+    }
+
+    useCallback 
+    is it a react hoot that returnes the memoized version of the function 
+    when passing a function as a prop to the child component the react treats it as a new function 
+    on every render even if the logic remins the same 
+    so to optimize the components we use useCallback and useMemo 
+
+
+    difference between useMemo and useCallback is that 
+    useMemo memoizes the value or the results 
+    but useCallback memoizes the function 
+
+    Difference Between useMemo and React.memo:
+    React.memo: Memoizes the entire component and prevents re-rendering unless props change. It’s used to prevent unnecessary re-renders at the component level.
+    useMemo: Memoizes the result of a calculation (which can include JSX), ensuring the calculation only happens when its dependencies change.
+
+
+
+    4. create a search functionality by using an rest api which will have name and email array 
+        you have to show name and email when name is typed in the search box 
+
+*/
+import * as React from 'react';
+function App() {
+  const [data, setData] = React.useState([]);
+  const [inputString, setInputString] = React.useState('');
+  const [filteredData, setFilteredData] = React.useState();
+
+  const fetchData = async () => {
+    try {
+      const response = await fetch(
+        'https://66e471b2d2405277ed1453ba.mockapi.io/api/name-email/users',
+      );
+      const data = response.json();
+      setData(data);
+    } catch {
+      console.log('error');
+    }
+  };
+  React.useEffect(() => {
+    fetchData();
+  }, []);
+
+  React.useEffect(() => {
+    if (inputString === '') {
+      setFilteredData([]);
+    } else {
+      const filtered = data.filter(d => d.name.toLowerCase().includes(inputString.toLowerCase()));
+      setFilteredData(filtered);
+    }
+  }, [data, inputString]);
+
+  return (
+    <div>
+      <div>enter name to search</div>
+      <input type="text" onChange={e => setInputString(e.target.value)} value={inputString} />
+      {filteredData.legth() && (
+        <div>
+          <ul>
+            {filteredData.map(data => {
+              return <li>{`${data.name},${data.email}`}</li>;
+            })}
+          </ul>
+        </div>
+      )}
+    </div>
+  );
+}
+export default App;
